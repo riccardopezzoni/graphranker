@@ -40,11 +40,12 @@ void addtoleaderboard(int index, int sumofpaths){
 
         //TODO to check: add in order to linked list
         if(leaderboardhead == NULL || sumofpaths < leaderboardhead->weight){
+            if(leaderboardhead == NULL) worstweight = sumofpaths;
             newgraph->next = leaderboardhead;
             leaderboardhead = newgraph;
         }else{
             Graph* curr = leaderboardhead;
-            while (curr->next != NULL && curr->next->weight >= sumofpaths){
+            while (curr->next != NULL && curr->next->weight <= sumofpaths){
                 curr = curr->next;
             }
 
@@ -55,9 +56,10 @@ void addtoleaderboard(int index, int sumofpaths){
         if (index >= rankinglenght){
             // TODO check if the delete and free is correct
             Graph* prec = NULL;
-            while(newgraph->next != NULL){
+            while(newgraph->next != NULL) {
                 prec = newgraph;
                 newgraph = newgraph->next;
+                worstweight = prec->weight;
             }
             free(prec->next);
             prec->next = NULL;
@@ -87,7 +89,12 @@ void handleaggiungigrafo(){
 }
 
 void handletopk(){
-    //print leaderboard
+    Graph* curr = leaderboardhead;
+    while(curr->next != NULL){
+        printf("%d ", curr->index);
+        curr = curr->next;
+    }
+    printf("%d", curr->index);
 }
 
 
@@ -108,11 +115,11 @@ int parse() {
     while (getline(&text,&bufsize,stdin)>0){
         printf("%s\n\n", text);
         if (strcmp(text, "AggiungiGrafo\n")==0){
-            printf("ricevuto aggiungi grafo");
+            printf("ricevuto aggiungi grafo\n");
             handleaggiungigrafo();
         }else if(strcmp(text, "TopK\n")==0){
-            printf("ricevuto topk");
-            handletopk();
+            printf("ricevuto topk\n");
+ //           handletopk();
         }
     }
 
@@ -131,12 +138,20 @@ int main(){
     freopen("input.txt", "r", stdin);
 #endif
 
-#ifdef leaderboardcheck
+    parse();
 
+#ifdef leaderboardcheck
+    addtoleaderboard(0,10);
+    addtoleaderboard(1,10);
+    addtoleaderboard(2,4);
+    addtoleaderboard(3,9);
+    addtoleaderboard(4,9);
+    addtoleaderboard(5,4);
+    addtoleaderboard(6,15);
+
+    handletopk();
 #endif
 
 
-
-    parse();
     return 0;
 }
