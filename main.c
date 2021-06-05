@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #define local
-#define leaderboardcheck
+//#define leaderboardcheck
 
 
 /*******************************
@@ -77,14 +77,14 @@ void addtoleaderboard(int index, int sumofpaths){
 
 void handleaggiungigrafo(){
     currgraph ++;
+    int i, j, value;
     //Mi aspetto nnodes linee con nnodes pesi per linea
-    for (int i = 0; i < nnodes; i++){
-        /*
+    for (i = 0; i < nnodes; i++){
         getline(&text,&bufsize,stdin);
-
-         */
-
-        //TODO add get of matrix
+        for (j = 0; j < nnodes; j++){
+          sscanf(text,"%d,", &value);
+            //TODO DO SOMETHING WITH VALUE
+        }
     }
 }
 
@@ -104,7 +104,7 @@ int parse() {
 
     getline(&text,&bufsize,stdin);
     printf("%s\n\n", text);
-    a = strtok(text,",");
+    a = strtok(text," ");
     b = strtok(NULL, "\n");
     printf("%s, %s", a ,b);
     a1 = atoi(a);
@@ -119,7 +119,7 @@ int parse() {
             handleaggiungigrafo();
         }else if(strcmp(text, "TopK\n")==0){
             printf("ricevuto topk\n");
- //           handletopk();
+            handletopk();
         }
     }
 
@@ -143,11 +143,25 @@ int main(){
 #ifdef leaderboardcheck
     addtoleaderboard(0,10);
     addtoleaderboard(1,10);
+    handletopk();
     addtoleaderboard(2,4);
     addtoleaderboard(3,9);
     addtoleaderboard(4,9);
+    handletopk();
     addtoleaderboard(5,4);
     addtoleaderboard(6,15);
+    addtoleaderboard(7,5);
+    addtoleaderboard(8,6);
+    handletopk();
+    addtoleaderboard(9,3);
+    addtoleaderboard(10,3);
+    addtoleaderboard(11,3);
+    handletopk();
+    addtoleaderboard(12,8);
+    handletopk();
+    addtoleaderboard(13,1);
+
+
 
     handletopk();
 #endif
