@@ -17,6 +17,9 @@ int s, e, a1, b1;
 size_t bufsize = 1024;
 int currgraph = 0;
 int worstweight = NULL;
+char* intformat =",%d";
+char* format;
+
 
 typedef struct Graph{
     int index;
@@ -70,6 +73,23 @@ void addtoleaderboard(int index, int sumofpaths){
 }
 
 
+/*******************************
+         HANDLER AND PARSER
+ *******************************/
+
+void setupformat(){
+    format=malloc(nnodes*3*sizeof(char));
+    char* baseformat = "%d,";
+    for (int index = 0 ; index < nnodes ; ++index){
+        memcpy(format + index*3, baseformat,3);
+    }
+    format[3*nnodes-1]= '\0';
+
+}
+
+
+
+
 
 /*******************************
          HANDLER AND PARSER
@@ -78,13 +98,13 @@ void addtoleaderboard(int index, int sumofpaths){
 void handleaggiungigrafo(){
     currgraph ++;
     int i, j, value;
+    int value2, value3, value4;
+    char* destinaion = "&value,&value2, &value3, &value4";
     //Mi aspetto nnodes linee con nnodes pesi per linea
     for (i = 0; i < nnodes; i++){
         getline(&text,&bufsize,stdin);
-        for (j = 0; j < nnodes; j++){
-          sscanf(text,"%d,", &value);
-            //TODO DO SOMETHING WITH VALUE
-        }
+        sscanf(text,format,&value,&value2, &value3, &value4);
+        printf("Letto %d , %d , %d , %d", value, value2, value3, value4);
     }
 }
 
@@ -111,6 +131,7 @@ int parse() {
     b1 = atoi(b);
     nnodes = a1;
     rankinglenght = b1;
+    setupformat();
 
     while (getline(&text,&bufsize,stdin)>0){
         printf("%s\n\n", text);
