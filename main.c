@@ -98,13 +98,14 @@ void setupformat(){
 void handleaggiungigrafo(){
     currgraph ++;
     int i, j, value;
+    j = 0;
     int value2, value3, value4;
     char* destinaion = "&value,&value2, &value3, &value4";
     //Mi aspetto nnodes linee con nnodes pesi per linea
-    for (i = 0; i < nnodes; i++){
-        getline(&text,&bufsize,stdin);
-        sscanf(text,format,&value,&value2, &value3, &value4);
-        printf("Letto %d , %d , %d , %d", value, value2, value3, value4);
+    int k;
+    while (scanf("%d,", &k) == 1 && i<17) {
+        printf("read number: %d\n\n", k);
+        i ++;
     }
 }
 
