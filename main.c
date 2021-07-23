@@ -29,6 +29,8 @@ typedef struct Graph{
 
 Graph* leaderboardhead;
 
+int** Matrix;
+
 /*******************************
          LEADERBOARD
  *******************************/
@@ -72,20 +74,11 @@ void addtoleaderboard(int index, int sumofpaths){
 
 }
 
-
 /*******************************
-         HANDLER AND PARSER
+         DIJKSTRA
  *******************************/
 
-void setupformat(){
-    format=malloc(nnodes*3*sizeof(char));
-    char* baseformat = "%d,";
-    for (int index = 0 ; index < nnodes ; ++index){
-        memcpy(format + index*3, baseformat,3);
-    }
-    format[3*nnodes-1]= '\0';
-
-}
+int DjikstraSum();
 
 
 
@@ -97,20 +90,26 @@ void setupformat(){
 
 void handleaggiungigrafo(){
     currgraph ++;
-    int i, j, value;
-    j = 0;
-    int value2, value3, value4;
-    char* destinaion = "&value,&value2, &value3, &value4";
+    int i, j, w;
     //Mi aspetto nnodes linee con nnodes pesi per linea
-    int k;
-    while (scanf("%d,", &k) == 1 && i<17) {
-        printf("read number: %d\n\n", k);
-        i ++;
+    for(i=0; i<nnodes; i++){
+        for (j = 0; j<nnodes; j++){
+            scanf("%d,", &w);
+            Matrix[i][j] = w;
+            printf("Aggiunto %d in posizone x%d y%d", w, i,j);
+        }
     }
+
+
+
 }
 
 void handletopk(){
     Graph* curr = leaderboardhead;
+    if (curr == NULL){
+        printf("\n");
+        return;
+    }
     while(curr->next != NULL){
         printf("%d ", curr->index);
         curr = curr->next;
@@ -132,7 +131,10 @@ int parse() {
     b1 = atoi(b);
     nnodes = a1;
     rankinglenght = b1;
-    setupformat();
+    Matrix = malloc(nnodes*sizeof(int*));
+    for (int i = 0; i < nnodes; i++){
+        Matrix[i]= malloc(nnodes*sizeof(int));
+    }
 
     while (getline(&text,&bufsize,stdin)>0){
         printf("%s\n\n", text);
