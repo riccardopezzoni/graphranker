@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #define local
+#define INFINITY 2147483647
 //#define leaderboardcheck
 
 
@@ -30,6 +31,10 @@ typedef struct Graph{
 Graph* leaderboardhead;
 
 int** Matrix;
+int* distance;
+int* pred;
+int* visited;
+int count, mindistance, nextnode;
 
 /*******************************
          LEADERBOARD
@@ -78,7 +83,48 @@ void addtoleaderboard(int index, int sumofpaths){
          DIJKSTRA
  *******************************/
 
-int DjikstraSum();
+int DjikstraSum(){
+    int i, j, sum;
+
+    for (i = 0; i < nnodes; i++) {
+        distance[i] = Matrix[0][i];
+        pred[i] = 0;
+        visited[i] = 0;
+    }
+
+    distance[0] = 0;
+    visited[0] = 1;
+    count = 1;
+
+    while (count < nnodes - 1) {
+        mindistance = INFINITY;
+
+        for (i = 0; i < nnodes; i++)
+            if (distance[i] < mindistance && !visited[i]) {
+                mindistance = distance[i];
+                nextnode = i;
+            }
+
+        visited[nextnode] = 1;
+        for (i = 0; i < nnodes; i++)
+            if (!visited[i])
+                if (mindistance + Matrix[nextnode][i] < distance[i]) {
+                    distance[i] = mindistance + Matrix[nextnode][i];
+                    pred[i] = nextnode;
+                }
+        count++;
+    }
+
+    //TODO CAN BE OPTIMASED INCLUDING IT BEFORE
+    sum = 0;
+    for (i = 1; i < nnodes; i++){
+        if (distance[i] != INFINITY) sum += distance[i];
+    }
+
+    return sum;
+
+
+}
 
 
 
@@ -90,15 +136,19 @@ int DjikstraSum();
 
 void handleaggiungigrafo(){
     currgraph ++;
-    int i, j, w;
+    int i, j, w, sum;
     //Mi aspetto nnodes linee con nnodes pesi per linea
     for(i=0; i<nnodes; i++){
         for (j = 0; j<nnodes; j++){
             scanf("%d,", &w);
-            Matrix[i][j] = w;
-            printf("Aggiunto %d in posizone x%d y%d", w, i,j);
+            if (w!= 0) Matrix[i][j] = w;
+            else Matrix[i][j] = INFINITY;
+            printf("Aggiunto %d in posizone x%d y%d", Matrix[i][j], i,j);
         }
     }
+
+    printf("Ottenuta somma di %d",DjikstraSum());
+    addtoleaderboard(currgraph,DjikstraSum());
 
 
 
@@ -135,6 +185,13 @@ int parse() {
     for (int i = 0; i < nnodes; i++){
         Matrix[i]= malloc(nnodes*sizeof(int));
     }
+    distance = malloc(nnodes*sizeof(int));
+    pred = malloc(nnodes*sizeof(int));
+    visited = malloc(nnodes*sizeof(int));
+
+
+
+
 
     while (getline(&text,&bufsize,stdin)>0){
         printf("%s\n\n", text);
