@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#define local
+//#define local
 #define INFINITY 2147483647
 //#define leaderboardcheck
 
@@ -17,7 +17,7 @@ char *text, *a, *b;
 int s, e, a1, b1;
 size_t bufsize = 1024;
 int currgraph = -1;
-int worstweight = NULL;
+int worstweight;
 
 
 typedef struct Graph{
@@ -82,7 +82,7 @@ void addtoleaderboard(int index, int sumofpaths){
  *******************************/
 
 int DjikstraSum(){
-    int i, j, sum;
+    int i, sum;
 
     for (i = 0; i < nnodes; i++) {
         distance[i] = Matrix[0][i];
@@ -134,18 +134,19 @@ int DjikstraSum(){
 
 void handleaggiungigrafo(){
     currgraph ++;
-    int i, j, w, sum;
+    int i, j, w;
     //Mi aspetto nnodes linee con nnodes pesi per linea
     for(i=0; i<nnodes; i++){
         for (j = 0; j<nnodes; j++){
-            scanf("%d,", &w);
-            if (w!= 0) Matrix[i][j] = w;
-            else Matrix[i][j] = INFINITY;
-            printf("Aggiunto %d in posizone x%d y%d", Matrix[i][j], i,j);
+            if ( scanf("%d,", &w)==1){
+                if (w!= 0) Matrix[i][j] = w;
+                else Matrix[i][j] = INFINITY;
+//            printf("Aggiunto %d in posizone x%d y%d", Matrix[i][j], i,j);
+            }
         }
     }
 
-    printf("\nOttenuta somma di %d per grafo %d",DjikstraSum(),currgraph);
+//    printf("\nOttenuta somma di %d per grafo %d",DjikstraSum(),currgraph);
     addtoleaderboard(currgraph,DjikstraSum());
 
 
@@ -162,7 +163,7 @@ void handletopk(){
         printf("%d ", curr->index);
         curr = curr->next;
     }
-    printf("%d", curr->index);
+    printf("%d\n", curr->index);
 }
 
 
@@ -170,11 +171,11 @@ void handletopk(){
 
 int parse() {
 
-    getline(&text,&bufsize,stdin);
-    printf("%s\n\n", text);
+    if(getline(&text,&bufsize,stdin)!=1){
+    }
     a = strtok(text," ");
     b = strtok(NULL, "\n");
-    printf("%s, %s", a ,b);
+//    printf("%s, %s", a ,b);
     a1 = atoi(a);
     b1 = atoi(b);
     nnodes = a1;
@@ -192,12 +193,12 @@ int parse() {
 
 
     while (getline(&text,&bufsize,stdin)>0){
-        printf("%s\n\n", text);
+//        printf("%s\n\n", text);
         if (strcmp(text, "AggiungiGrafo\n")==0){
-            printf("ricevuto aggiungi grafo\n");
+//            printf("ricevuto aggiungi grafo\n");
             handleaggiungigrafo();
         }else if(strcmp(text, "TopK\n")==0){
-            printf("ricevuto topk\n");
+//            printf("ricevuto topk\n");
             handletopk();
         }
     }
