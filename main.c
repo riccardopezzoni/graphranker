@@ -16,10 +16,8 @@ int nbytes = 1025;
 char *text, *a, *b;
 int s, e, a1, b1;
 size_t bufsize = 1024;
-int currgraph = 0;
+int currgraph = -1;
 int worstweight = NULL;
-char* intformat =",%d";
-char* format;
 
 
 typedef struct Graph{
@@ -31,7 +29,7 @@ typedef struct Graph{
 Graph* leaderboardhead;
 
 int** Matrix;
-int* distance;
+unsigned long* distance;
 int* pred;
 int* visited;
 int count, mindistance, nextnode;
@@ -147,7 +145,7 @@ void handleaggiungigrafo(){
         }
     }
 
-    printf("Ottenuta somma di %d",DjikstraSum());
+    printf("\nOttenuta somma di %d per grafo %d",DjikstraSum(),currgraph);
     addtoleaderboard(currgraph,DjikstraSum());
 
 
@@ -185,7 +183,7 @@ int parse() {
     for (int i = 0; i < nnodes; i++){
         Matrix[i]= malloc(nnodes*sizeof(int));
     }
-    distance = malloc(nnodes*sizeof(int));
+    distance = malloc(nnodes*sizeof(unsigned long));
     pred = malloc(nnodes*sizeof(int));
     visited = malloc(nnodes*sizeof(int));
 
