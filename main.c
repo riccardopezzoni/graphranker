@@ -134,15 +134,25 @@ int DjikstraSum(){
 
 void handleaggiungigrafo(){
     currgraph ++;
-    int i, j, w;
+    int i, j;
     //Mi aspetto nnodes linee con nnodes pesi per linea
     for(i=0; i<nnodes; i++){
-        for (j = 0; j<nnodes; j++){
-            if ( scanf("%d,", &w)==1){
-                if (w!= 0) Matrix[i][j] = w;
+        if(getline(&text,&bufsize,stdin)!=1){
+            int index = 0;
+            for(j=0; j<nnodes; j++){
+                int result = 0;
+                while(text[index]!=','&&text[index]!='\n'){
+                    result *= 10;
+                    result += (text[index] - '0');
+                    index ++;
+                }
+                if (result!=0) Matrix[i][j] = result;
                 else Matrix[i][j] = INFINITY;
-//            printf("Aggiunto %d in posizone x%d y%d", Matrix[i][j], i,j);
+//                printf("Aggiunto %d in posizone x%d y%d", Matrix[i][j], i,j);
+                index++;
             }
+        //            printf("Aggiunto %d in posizone x%d y%d", Matrix[i][j], i,j);
+
         }
     }
 
