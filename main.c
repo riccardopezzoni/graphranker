@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdlib.h>
 //#define local
 #define INFINITY 2147483647
-//#define leaderboardcheck
 
 
 /*******************************
@@ -12,71 +10,82 @@
  *******************************/
 
 int nnodes, rankinglenght;
-int nbytes = 1025;
 char *text, *a, *b;
-int s, e, a1, b1;
+int a1, b1;
 size_t bufsize = 1024;
 int currgraph = -1;
 int worstweight;
 
-
 typedef struct Graph{
     int index;
     int weight;
-    struct Graph* next;
 }Graph;
 
-Graph* leaderboardhead;
+struct Graph* leaderboard;
 
 int** Matrix;
 unsigned long* distance;
-int* pred;
 int* visited;
 int count, mindistance, nextnode;
+
+/*******************************
+         HEAP
+ *******************************/
+
+void swap(int a, int b) {
+    int tempi = leaderboard[a].index;
+    int tempw = leaderboard[a].weight;
+    leaderboard[a].index = leaderboard[b].index;
+    leaderboard[a].weight = leaderboard[b].weight;
+    leaderboard[b].index = tempi;
+    leaderboard[b].weight = tempw;
+}
+
+ void heapify(int n, int i) {
+     int largest = i;
+     int l = 2 * i + 1;
+     int r = 2 * i + 2;
+     if (l < n && (leaderboard[l].weight > leaderboard[largest].weight ||
+                (leaderboard[l].weight == leaderboard[largest].weight &&
+                 leaderboard[l].index > leaderboard[largest].index))) largest = l;
+     if (r < n && (leaderboard[r].weight > leaderboard[largest].weight ||
+                (leaderboard[r].weight == leaderboard[largest].weight &&
+                leaderboard[r].index > leaderboard[largest].index))) largest = r;
+     if (largest != i) {
+         swap(i, largest);
+         heapify(n, largest);
+     }
+ }
+
+void heapSort() {
+    int startIdx = (rankinglenght / 2) - 1;
+    for (int i = startIdx; i >= 0; i--) {
+        heapify(rankinglenght, i);
+    }
+
+}
 
 /*******************************
          LEADERBOARD
  *******************************/
 
 void addtoleaderboard(int index, int sumofpaths){
-
-    if (index<rankinglenght || sumofpaths<worstweight){
+    if(index<rankinglenght){
         Graph* newgraph = malloc(sizeof (struct Graph));
         newgraph->index = index;
         newgraph->weight = sumofpaths;
-        newgraph->next = NULL;
-
-        //TODO to check: add in order to linked list
-        if(leaderboardhead == NULL || sumofpaths < leaderboardhead->weight){
-            if(leaderboardhead == NULL) worstweight = sumofpaths;
-            newgraph->next = leaderboardhead;
-            leaderboardhead = newgraph;
-        }else{
-            Graph* curr = leaderboardhead;
-            while (curr->next != NULL && curr->next->weight <= sumofpaths){
-                curr = curr->next;
-            }
-
-            newgraph->next = curr->next;
-            curr->next = newgraph;
+        leaderboard[index] = *newgraph;
+        if (index == 0 || worstweight < sumofpaths) worstweight = sumofpaths;
+        if (index == rankinglenght - 1) heapSort();
+    }else{
+        if (sumofpaths<worstweight){
+            leaderboard[0].index = currgraph;
+            leaderboard[0].weight = sumofpaths;
+            heapify(rankinglenght, 0);
+            worstweight = leaderboard[0].weight;
         }
-
-        if (index >= rankinglenght){
-            // TODO check if the delete and free is correct
-            Graph* prec = NULL;
-            while(newgraph->next != NULL) {
-                prec = newgraph;
-                newgraph = newgraph->next;
-                worstweight = prec->weight;
-            }
-            free(prec->next);
-            prec->next = NULL;
-        }
-
     }
-
 }
-
 /*******************************
          DIJKSTRA
  *******************************/
@@ -86,7 +95,6 @@ int DjikstraSum(){
 
     for (i = 0; i < nnodes; i++) {
         distance[i] = Matrix[0][i];
-        pred[i] = 0;
         visited[i] = 0;
     }
 
@@ -108,25 +116,17 @@ int DjikstraSum(){
             if (!visited[i])
                 if (mindistance + Matrix[nextnode][i] < distance[i]) {
                     distance[i] = mindistance + Matrix[nextnode][i];
-                    pred[i] = nextnode;
                 }
         count++;
     }
 
-    //TODO CAN BE OPTIMASED INCLUDING IT BEFORE
     sum = 0;
     for (i = 1; i < nnodes; i++){
         if (distance[i] != INFINITY) sum += distance[i];
     }
 
     return sum;
-
-
 }
-
-
-
-
 
 /*******************************
          HANDLER AND PARSER
@@ -148,36 +148,26 @@ void handleaggiungigrafo(){
                 }
                 if (result!=0) Matrix[i][j] = result;
                 else Matrix[i][j] = INFINITY;
-//                printf("Aggiunto %d in posizone x%d y%d", Matrix[i][j], i,j);
                 index++;
             }
-        //            printf("Aggiunto %d in posizone x%d y%d", Matrix[i][j], i,j);
-
         }
     }
-
-//    printf("\nOttenuta somma di %d per grafo %d",DjikstraSum(),currgraph);
     addtoleaderboard(currgraph,DjikstraSum());
-
-
-
 }
 
 void handletopk(){
-    Graph* curr = leaderboardhead;
-    if (curr == NULL){
+    if (currgraph == -1 ) printf("\n");
+    else{
+        int end;
+        if (currgraph < rankinglenght) end = currgraph+1;
+        else end = rankinglenght;
+        for (int i = 0; i<end-1; i++){
+            printf("%d ", leaderboard[i].index);
+        }
+        printf("%d", leaderboard[end-1].index);
         printf("\n");
-        return;
     }
-    while(curr->next != NULL){
-        printf("%d ", curr->index);
-        curr = curr->next;
-    }
-    printf("%d\n", curr->index);
 }
-
-
-
 
 int parse() {
 
@@ -185,7 +175,6 @@ int parse() {
     }
     a = strtok(text," ");
     b = strtok(NULL, "\n");
-//    printf("%s, %s", a ,b);
     a1 = atoi(a);
     b1 = atoi(b);
     nnodes = a1;
@@ -195,20 +184,16 @@ int parse() {
         Matrix[i]= malloc(nnodes*sizeof(int));
     }
     distance = malloc(nnodes*sizeof(unsigned long));
-    pred = malloc(nnodes*sizeof(int));
     visited = malloc(nnodes*sizeof(int));
-
+    leaderboard = malloc(rankinglenght*sizeof(struct Graph));
 
 
 
 
     while (getline(&text,&bufsize,stdin)>0){
-//        printf("%s\n\n", text);
         if (strcmp(text, "AggiungiGrafo\n")==0){
-//            printf("ricevuto aggiungi grafo\n");
             handleaggiungigrafo();
         }else if(strcmp(text, "TopK\n")==0){
-//            printf("ricevuto topk\n");
             handletopk();
         }
     }
@@ -229,33 +214,6 @@ int main(){
 #endif
 
     parse();
-
-#ifdef leaderboardcheck
-    addtoleaderboard(0,10);
-    addtoleaderboard(1,10);
-    handletopk();
-    addtoleaderboard(2,4);
-    addtoleaderboard(3,9);
-    addtoleaderboard(4,9);
-    handletopk();
-    addtoleaderboard(5,4);
-    addtoleaderboard(6,15);
-    addtoleaderboard(7,5);
-    addtoleaderboard(8,6);
-    handletopk();
-    addtoleaderboard(9,3);
-    addtoleaderboard(10,3);
-    addtoleaderboard(11,3);
-    handletopk();
-    addtoleaderboard(12,8);
-    handletopk();
-    addtoleaderboard(13,1);
-
-
-
-    handletopk();
-#endif
-
 
     return 0;
 }
